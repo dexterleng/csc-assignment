@@ -1,0 +1,18 @@
+@startuml
+
+Actor User
+participant "HTML Page" as Page
+participant "Javascript" as JS
+participant Server
+Participant "Cloudinary CDN" as CDN
+
+User -> Page: Types query in textbox
+JS -> JS: Keydown event
+JS -> Server: GET /api/Talents
+Server --> JS: Responds with JSON data of artists
+JS -> Page: JQuery mutate DOM with formatted records
+Page -> CDN: Browser queries CDN for images of artists
+CDN --> Page: Returns image
+Page -> Page: Display image for artist
+
+@enduml
