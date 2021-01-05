@@ -91,6 +91,9 @@
         const clarifaiTable = renderClarifaiGeneralModelTable(res.clarifaiGeneralModel);
         container.append(clarifaiTable);
 
+        const clarifaiReceiptTable = renderClarifaiReceiptModelTable(res.clarifaiReceiptModel);
+        container.append(clarifaiReceiptTable);
+
         container.show();
     }
 
@@ -151,7 +154,41 @@
         } 
 
         return `
-<h3>Identified Clarifai Concepts / Tags</h3>
+<h3>Identified Clarifai Concepts / Tags (General Model)</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Concept</th>
+      <th scope="col">Confidence</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${rows.join('\n')}
+  </tbody>
+</table>
+        `;
+    }
+
+    function renderClarifaiReceiptModelTable(model) {
+        const rows = [];
+
+        let concepts = [];
+        if (model["Data"] && model["Data"]["Concepts"]) {
+            concepts = model["Data"]["Concepts"];
+        }
+
+        for (const concept of concepts) {
+            rows.push(`
+            <tr>
+                <td>${concept['Name']}</td>
+                <td>${concept['Value']}</td>
+            </tr>
+            `
+            );
+        }
+
+        return `
+<h3>Identified Clarifai Concepts / Tags (Custom Receipt Model)</h3>
 <table class="table">
   <thead>
     <tr>

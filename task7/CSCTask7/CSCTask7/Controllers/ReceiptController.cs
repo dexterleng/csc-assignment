@@ -47,11 +47,13 @@ namespace CSCTask7.Controllers
 
             var recognizedForm = await AzureReceiptRecognition(file.LocalFileName);
             var clarifaiGeneralModel = await ClarifaiGeneralModel(file.LocalFileName);
+            var clarifaiReceiptModel = await ClarifaiReceiptModel(file.LocalFileName);
 
             return Ok(new
             {
                 azureRecognizedForm = recognizedForm,
-                clarifaiGeneralModel = clarifaiGeneralModel
+                clarifaiGeneralModel = clarifaiGeneralModel,
+                clarifaiReceiptModel = clarifaiReceiptModel
             });
         }
 
@@ -80,20 +82,24 @@ namespace CSCTask7.Controllers
         private async Task<Output> ClarifaiGeneralModel(String receipt)
         {
             var stream = File.Open(receipt, FileMode.Open);
-            var client = new V2.V2Client(ClarifaiChannel.Grpc());
 
-            var metadata = new Metadata
+            try
             {
-                {"Authorization", "Key " + Config.ClarifaiKey}
-            };
 
-            var response = await client.PostModelOutputsAsync(
-                    new PostModelOutputsRequest()
-                    {
+                var client = new V2.V2Client(ClarifaiChannel.Grpc());
+
+                var metadata = new Metadata
+                {
+                    {"Authorization", "Key " + Config.ClarifaiKey}
+                };
+
+                var response = await client.PostModelOutputsAsync(
+                        new PostModelOutputsRequest()
+                        {
                         // general model id
                         ModelId = "aaa03c23b3724a16a56b629203edc62c",
-                        Inputs =
-                        {
+                            Inputs =
+                            {
                             new List<Input>()
                             {
                                 new Input()
@@ -107,18 +113,75 @@ namespace CSCTask7.Controllers
                                     }
                                 }
                             }
-                        }
-                    },
-                    metadata
-            );
+                            }
+                        },
+                        metadata
+                );
 
-            if (response.Status.Code != Clarifai.Api.Status.StatusCode.Success) {
-                throw new Exception("Post model outputs failed, status: " + response.Status.Description);
+                if (response.Status.Code != Clarifai.Api.Status.StatusCode.Success)
+                {
+                    throw new Exception("Post model outputs failed, status: " + response.Status.Description);
+                }
+
+                var output = response.Outputs.First();
+
+                return output;
+            } finally
+            {
+                stream.Close();
             }
+        }
 
-            var output = response.Outputs.First();
+        private async Task<Output> ClarifaiReceiptModel(String receipt)
+        {
+            var stream = File.Open(receipt, FileMode.Open);
 
-            return output;
+            try
+            {
+
+                var client = new V2.V2Client(ClarifaiChannel.Grpc());
+
+                var metadata = new Metadata
+            {
+                {"Authorization", "Key " + Config.ClarifaiKey}
+            };
+
+                var response = await client.PostModelOutputsAsync(
+                        new PostModelOutputsRequest()
+                        {
+                            ModelId = Config.ClarifaiReceiptModelId,
+                            Inputs =
+                            {
+                            new List<Input>()
+                            {
+                                new Input()
+                                {
+                                    Data = new Data()
+                                    {
+                                        Image = new Image()
+                                        {
+                                            Base64 = await Google.Protobuf.ByteString.FromStreamAsync(stream)
+                                        }
+                                    }
+                                }
+                            }
+                            }
+                        },
+                        metadata
+                );
+
+                if (response.Status.Code != Clarifai.Api.Status.StatusCode.Success)
+                {
+                    throw new Exception("Post model outputs failed, status: " + response.Status.Description);
+                }
+
+                var output = response.Outputs.First();
+
+                return output;
+            } finally
+            {
+                stream.Close();
+            }
         }
     }
 }
