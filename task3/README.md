@@ -1,5 +1,29 @@
 # Task 3
 
+## Web API document and Postman testing result
+
+Refer to `task3-documents.pdf`.
+
+## Understanding, efficiency, robustness and security of the code
+
+Loading bar is shown during login/register/invoke api API request:
+
+![](images/loading.png)
+
+Client side email and password validation for login and register:
+
+![](images/email-validation.png)
+
+![](images/password-validation.png)
+
+Retry logic for login, register, and invoke api:
+
+![](images/retry.png)
+
+API failure alert after multiple retries:
+
+![](images/failure.png)
+
 ## Set up Guide
 
 ### 1. Recaptcha

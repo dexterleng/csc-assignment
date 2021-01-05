@@ -58,6 +58,22 @@
     }
 
     self.register = function () {
+        if (!self.isValidEmail(self.registerEmail())) {
+            alert("Please enter a valid email address.");
+            return;
+        }
+
+        const password = self.registerPassword();
+        if (password === null || password === undefined || password.length < 6) {
+            alert("Password should be at least 6 characters long.");
+            return
+        }
+
+        if (self.registerPassword() !== self.registerPassword2()) {
+            alert("Passwords do not match.");
+            return;
+        }
+
         grecaptcha.ready(function () {
             grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'submit' }).then(function (token) {
                 self.result('');
@@ -83,6 +99,17 @@
     }
 
     self.login = function () {
+        if (!self.isValidEmail(self.loginEmail())) {
+            alert("Please enter a valid email address.");
+            return;
+        }
+
+        const password = self.loginPassword();
+        if (password === null || password === undefined || password.length < 6) {
+            alert("Password should be at least 6 characters long.");
+            return
+        }
+
         self.result('');
         self.errors.removeAll();
 
@@ -182,6 +209,11 @@
 
     self.hideAlert = function () {
         $("#danger-alert").hide();
+    }
+
+    self.isValidEmail = function (email) {
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
     }
 }
 
