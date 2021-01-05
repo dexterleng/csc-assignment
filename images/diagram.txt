@@ -1,0 +1,23 @@
+@startuml
+
+Actor User
+participant "HTML Page" as Page
+participant "Javascript" as JS
+participant Server
+participant "S3 API" as S3
+participant "Bitly API" as Bitly
+
+
+User -> Page: Clicks "browse" and selects image from local storage
+User -> Page: Clicks submit button
+JS -> JS: Form onSubmit, block action, encode multipart/formdata
+JS -> Server: POST /api/upload
+Server -> S3: Server processes files and sends to S3
+S3 --> Server: Resource creation successful
+Server -> Server: Generate S3 resource url based on bucket name and filename
+Server -> Bitly: Submit S3 resource url to Bitly API
+Bitly --> Server: Returns shortened url and other data
+Server --> JS: Returns only shortened url
+JS -> Page: Mutate DOM to display link to user
+
+@enduml
