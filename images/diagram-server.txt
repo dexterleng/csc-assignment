@@ -1,0 +1,12 @@
+@startuml
+participant "HTTP Client" as client
+participant "ASP Server" as server
+participant "NEA API" as NEA
+
+client -> server: GET /WeatherService form
+server -> NEA: GET /v1/environment/24-hour-weather-forecast
+NEA --> server: JSON result of 24 hour weather forecast
+server -> server: Set response Content-Type header: application/json
+server --> client: Send JSON results back to client
+
+@enduml 
