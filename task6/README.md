@@ -1,5 +1,55 @@
 # CSC Task 6
 
+## Sequence Diagrams
+
+There are two sequence diagrams, `sequence-diagram.png` and `sequence-diagram-webhook.png`.
+
+## Usage and Testing
+
+![](images/register_login.png)
+
+Head over to /Home/Login/ to register then login. You should then be redirected to /Home/Dashboard/
+
+If you have no existing subscription, you should see a plans page:
+
+![](images/unsubscribed-dashboard.png)
+
+Clicking the checkout button will direct you to a Stripe Checkout page:
+
+![](images/checkout.png)
+
+Note that you can use `4242 4242 4242 4242` as a test card when checking out or managing subscriptions.
+
+After checkout is completed, you will be redirected back to the dashboard, which will now show the subscription plan, status, manage billing button, and a list of stripe charge events.
+
+![](images/subscribed-dashboard.png)
+
+Clicking the manage billing button will direct you to the self serve customer portal, which can be used to:
+
+1. Upgrade Plan
+2. Cancel Plan
+3. Update payment information
+
+![](images/manage-billing.png)
+
+To test failed recurring charges, you can update the payment information to use the card `4000 0000 0000 0341`. See the Stripe documentation for the full list of cards used to test for specific errors: https://stripe.com/docs/testing#cards-responses.
+
+## Understanding, efficiency, robustness and security of the code
+
+Loading bar is shown for login/register/generate a stripe checkout / self-serve portal session:
+
+![](images/login-dashboard-loading.png)
+
+![](images/stripe-session-loading.png)
+
+The following APIs will retry up-to five times when they fail:
+1. Login
+2. Register
+3. Generate Checkout Session (Basic + Premium)
+4. Generate Self-Serve Portal Session.
+
+![](images/register-login-retry.png)
+
 ## Set Up Guide
 
 ### 1. Create Products and Pricing
@@ -71,9 +121,3 @@ You should see the webhook secret printed in the terminal:
 Add the secret to Config.cs and restart the project.
 
 The server should now receive webhook events.
-
-### 5. Start using the application
-
-Head over to /Home/Login/ to register then login. You should then be redirected to /Home/Dashboard/
-
-Note that you can use `4242 4242 4242 4242` as a test card when checking out or managing subscriptions.
