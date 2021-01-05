@@ -4,6 +4,10 @@
 
 Refer to `task3-documents.pdf`.
 
+## Sequence Diagram
+
+Refer to `sequence-diagram.png`
+
 ## Understanding, efficiency, robustness and security of the code
 
 Loading bar is shown during login/register/invoke api API request:
