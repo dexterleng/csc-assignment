@@ -57,5 +57,7 @@ There should be only one concept under the custom model - receipt.
 
 Train the custom model by adding positive and negative receipt images.
 
+![](images/receipt-training.png)
+
 You can create a free Azure Cognitive Service subscription to get the key and endpoint
 https://azure.microsoft.com/en-us/services/cognitive-services/
