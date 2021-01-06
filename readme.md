@@ -4,6 +4,9 @@
 1. Click on the `TalentSearch` project from `Solution Explorer`
 2. In the `Properties` section, use the url under `SSL URL` to access the page with HTTPS enabled
 
+# Usage
+Navigate to /searchTalent/index.html
+
 # Sequence Diagram
 ![](images/diagram.png)
 
