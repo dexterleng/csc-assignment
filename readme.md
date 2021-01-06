@@ -53,6 +53,9 @@ BITLY_TOKEN=YOUR_BITLY_TOKEN
 AWS_BUCKET=YOUR_AWS_BUCKET_NAME
 ```
 
+# Usage
+Navigate to /Uploader/Index, select image and upload it. A download link should appear above the form, errors will be shown in an alert box.
+
 # Sequence Diagram
 ![](images/diagram.png)
 
