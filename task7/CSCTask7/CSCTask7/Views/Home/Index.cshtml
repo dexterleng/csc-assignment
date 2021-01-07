@@ -209,7 +209,7 @@
             fn()
                 .then(resolve)
                 .catch((e) => {
-                    if (maxRetries === 1) {
+                    if (maxRetries === 1 || (e.status && e.status !== 500)) {
                         return reject(e);
                     }
                     console.log('retrying failed promise...');

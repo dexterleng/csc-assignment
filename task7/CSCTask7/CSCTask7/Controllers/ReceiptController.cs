@@ -22,6 +22,18 @@ namespace CSCTask7.Controllers
     {
         public async Task<IHttpActionResult> PostFormData()
         {
+            var f = HttpContext.Current.Request.Files?[0];
+
+            if (f == null || f.ContentLength == 0)
+            {
+                return BadRequest("File missing");
+            }
+
+            if (!f.ContentType.Contains("image"))
+            {
+                return BadRequest("File must be an image");
+            }
+
             // https://docs.microsoft.com/en-us/aspnet/web-api/overview/advanced/sending-html-form-data-part-2
             // Check if the request contains multipart/form-data.
             if (!Request.Content.IsMimeMultipartContent())
