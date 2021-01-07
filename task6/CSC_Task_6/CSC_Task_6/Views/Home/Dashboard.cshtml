@@ -123,24 +123,20 @@
             console.log(obj);
             return `
             <tr>
-                <td>${obj.type}</td>
-                <td>${obj.data.object.amount}</td>
-                <td>${obj.data.object.currency}</td>
-                <td>${obj.data.object.status}</td>
-                <td>${e.Date}</td>
+                <td class="col-md-2">${obj.type}</td>
+                <td class="col-md-8" style="word-wrap: break-word;min-width: 160px;max-width: 160px;white-space:normal;">${JSON.stringify(obj.data.object)}</td>
+                <td class="col-md-2">${e.Date}</td>
             </tr>
 `;
         })
 
         return `
-<h3>Stripe Charge Events</h3>
+<h3>Stripe Events</h3>
 <table class="table">
   <thead>
     <tr>
       <th scope="col">Type</th>
-      <th scope="col">Amount (cents)</th>
-      <th scope="col">Currency</th>
-      <th scope="col">Status</th>
+      <th scope="col">Content</th>
       <th scope="col">Date</th>
     </tr>
   </thead>

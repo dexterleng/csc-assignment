@@ -167,8 +167,20 @@ namespace CSC_Task_6.Controllers
                 if (stripeEvent.Type == Events.ChargeSucceeded || stripeEvent.Type == Events.ChargeFailed)
                 {
                     var charge = stripeEvent.Data.Object as Charge;
-                    InsertChargeEvent(charge, json);
+                    InsertStripeEvent(charge.CustomerId, json);
                 }
+
+                var subscriptionEvents = new string[] {
+                    Events.CustomerSubscriptionCreated,
+                    Events.CustomerSubscriptionDeleted,
+                    Events.CustomerSubscriptionUpdated
+                };
+                if (subscriptionEvents.Contains(stripeEvent.Type))
+                {
+                    var subscription = stripeEvent.Data.Object as Subscription;
+                    InsertStripeEvent(subscription.CustomerId, json);
+                }
+
                 return Ok();
             }
             catch (StripeException e)
@@ -177,11 +189,8 @@ namespace CSC_Task_6.Controllers
             }
         }
 
-        public void InsertChargeEvent(Charge charge, String chargeJsonString)
+        public void InsertStripeEvent(String customerId, String jsonString)
         {
-            var status = charge.Status;
-            var customerId = charge.CustomerId;
-
             if (customerId == null)
             {
                 return;
@@ -199,7 +208,7 @@ namespace CSC_Task_6.Controllers
             var stripeEventRecord = new StripeEvent
             {
                 Date = DateTime.Now,
-                Json = chargeJsonString,
+                Json = jsonString,
                 User = user
             };
             context.StripeEvents.Add(stripeEventRecord);
