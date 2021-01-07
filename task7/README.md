@@ -24,7 +24,7 @@ A loading bar is displayed after the image is uploaded while the image is being 
 
 ![](images/loading.png)
 
-The AJAX request made when the user clicks on submit will retry at most five times if the status code is 4xx or 5xx.
+The AJAX request made when the user clicks on submit will retry at most five times if the status code is 500.
 
 ![](images/retry.png)
 
@@ -35,6 +35,8 @@ A failure alert is shown if the form submit request fails after multiple retries
 There is client side validation to check that the file is an image before submitting.
 
 ![](images/image-type-validation.png)
+
+Server-side validation is also present - if the file is not present or is a non-image, `400 Bad Request` will be sent (see the sequence diagram).
 
 ## Set up Guide
 
