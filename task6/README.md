@@ -20,7 +20,7 @@ Clicking the checkout button will direct you to a Stripe Checkout page:
 
 Note that you can use `4242 4242 4242 4242` as a test card when checking out or managing subscriptions.
 
-After checkout is completed, you will be redirected back to the dashboard, which will now show the subscription plan, status, manage billing button, and a list of stripe charge events.
+After checkout is completed, you will be redirected back to the dashboard, which will now show the subscription plan, status, manage billing button, and a list of stripe charge and subscribe events.
 
 ![](images/subscribed-dashboard.png)
 
