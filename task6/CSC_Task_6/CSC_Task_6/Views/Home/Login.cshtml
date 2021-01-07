@@ -1,0 +1,201 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+}
+
+<style type="text/css">
+    .progress-bar.indeterminate {
+        position: relative;
+        animation: progress-indeterminate 3s linear infinite;
+    }
+
+    @@keyframes progress-indeterminate {
+
+        from {
+            left: -25%;
+            width: 25%;
+        }
+
+        to {
+            left: 100%;
+            width: 25%;
+        }
+    }
+</style>
+
+<div id="spinner" style="display: none;">
+    <div class="progress" style="position: relative;">
+        <div class="progress-bar progress-bar-striped indeterminate"></div>
+    </div>
+</div>
+
+<div id="danger-alert" style="display: none;">
+    <div id="danger-alert-text" class="alert alert-danger" role="alert">
+        Request Failed.
+    </div>
+</div>
+
+<h2>Login</h2>
+
+<form id="login-form">
+    <div class="form-group">
+        <label for="emailInput">Email address</label>
+        <input type="email" class="form-control" id="emailInput" aria-describedby="emailHelp" placeholder="Enter email">
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+        <label for="passwordInput">Password</label>
+        <input type="password" class="form-control" id="passwordInput" placeholder="Password">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+<h2>Register</h2>
+<form id="register-form">
+    <div class="form-group">
+        <label for="emailInput">Email address</label>
+        <input type="email" class="form-control" id="emailInput" aria-describedby="emailHelp" placeholder="Enter email">
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+        <label for="passwordInput">Password</label>
+        <input type="password" class="form-control" id="passwordInput" placeholder="Password">
+    </div>
+
+    <div class="form-group">
+        <label for="confirmPasswordInput">Confirm Password</label>
+        <input type="password" class="form-control" id="confirmPasswordInput" placeholder="Password">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<script>
+    function processLoginForm(e) {
+        e.preventDefault();
+
+        const email = $("#login-form #emailInput").val();
+        const password = $("#login-form #passwordInput").val();
+
+        makeApiRequest({
+            type: "POST",
+            url: '/Token',
+            data: {
+                username: email,
+                password: password,
+                grant_type: 'password'
+            },
+        }).then(function (data) {
+            localStorage.setItem('access_token', data.access_token);
+            window.location.replace('/Home/Dashboard');
+        }).catch(function () {
+            alert("Login Failed.");
+        });
+
+        return false;
+    }
+
+    var loginForm = document.getElementById('login-form');
+    if (loginForm.attachEvent) {
+        loginForm.attachEvent("submit", processLoginForm);
+    } else {
+        loginForm.addEventListener("submit", processLoginForm);
+    }
+
+    function processRegisterForm(e) {
+        e.preventDefault();
+
+        const email = $("#register-form #emailInput").val();
+        const password = $("#register-form #passwordInput").val();
+        const confirmPassword = $("#register-form #confirmPasswordInput").val();
+
+        makeApiRequest({
+            type: "POST",
+            url: '/api/account/register',
+            data: {
+                Email: email,
+                Password: password,
+                ConfirmPassword: confirmPassword
+            },
+        }).then(function () {
+            alert("Register Successful");
+        }).catch(function () {
+            alert("Register Failed.");
+        });
+
+        return false;
+    }
+
+    var registerForm = document.getElementById('register-form');
+    if (registerForm.attachEvent) {
+        registerForm.attachEvent("submit", processRegisterForm);
+    } else {
+        registerForm.addEventListener("submit", processRegisterForm);
+    }
+
+    function retryingAjax(ajaxOptions, maxRetries, timeoutMs) {
+        const thunk = () => ajaxPromise(ajaxOptions);
+        const retry = (fn, maxRetries, timeoutMs) => new Promise((resolve, reject) => {
+            fn()
+                .then(resolve)
+                .catch((e) => {
+                    if (maxRetries === 1) {
+                        return reject(e);
+                    }
+                    console.log('retrying failed promise...');
+                    setTimeout(() => {
+                        retry(fn, maxRetries - 1, timeoutMs).then(resolve).catch(reject);
+                    }, timeoutMs);
+
+                })
+        });
+        return retry(thunk, maxRetries, timeoutMs);
+    }
+
+    function ajaxPromise(ajaxOptions) {
+        return new Promise((resolve, reject) => {
+            $.ajax(ajaxOptions)
+                .done(function (data) { resolve(data) })
+                .fail(function (jqXHR) { reject(jqXHR) });
+        });
+    }
+
+    async function makeApiRequest(ajaxOptions, maxRetries = 5, timeoutMs = 1000) {
+        try {
+            hideAlert();
+            showSpinner();
+            const res = await retryingAjax(ajaxOptions, maxRetries, timeoutMs);
+            return res;
+        } catch (e) {
+            if (e.status) {
+                showAlert(`Request Failed with status code ${e.status}`);
+            } else {
+                showAlert("Request Failed");
+            }
+            throw e;
+        } finally {
+            hideSpinner();
+        }
+    }
+
+    function deleteDashboardSpinner() {
+        $("#dashboard-spinner").hide();
+    }
+
+    function showSpinner() {
+        $("#spinner").show();
+    }
+
+    function showAlert(msg) {
+        $("#danger-alert-text").text(msg);
+        $("#danger-alert").show();
+    }
+
+    function hideSpinner() {
+        $("#spinner").hide();
+    }
+
+    function hideAlert() {
+        $("#danger-alert").hide();
+    }
+</script>

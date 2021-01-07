@@ -1,0 +1,323 @@
+﻿
+@{
+    ViewBag.Title = "Dashboard";
+}
+
+<style type="text/css">
+    .progress-bar.indeterminate {
+        position: relative;
+        animation: progress-indeterminate 3s linear infinite;
+    }
+
+    @@keyframes progress-indeterminate {
+
+        from {
+            left: -25%;
+            width: 25%;
+        }
+
+        to {
+            left: 100%;
+            width: 25%;
+        }
+    }
+</style>
+
+<div id="spinner" style="display: none;">
+    <div class="progress" style="position: relative;">
+        <div class="progress-bar progress-bar-striped indeterminate"></div>
+    </div>
+</div>
+
+<div id="danger-alert" style="display: none;">
+    <div id="danger-alert-text" class="alert alert-danger" role="alert">
+        Request Failed.
+    </div>
+</div>
+
+<h2>Dashboard</h2>
+
+<div id="body">
+    <div id="dashboard-spinner">
+        <h3>Loading...</h3>
+    </div>
+    <div id="dashboard">
+    </div>
+</div>
+
+<script>
+    const stripe = Stripe('@(Config.StripePublishableKey)');
+    const access_token = localStorage.getItem('access_token');
+
+    fetchUserInfo()
+        .then(({ userInfo, subscription, stripeEvents }) => {
+            const isSubscribed = subscription !== null;
+            const dashboardBody = isSubscribed ? renderSubscribedDashboard(userInfo, subscription, stripeEvents) : renderUnsubscribedDashboard(userInfo);
+            $("#dashboard").append(dashboardBody);
+        })
+        .catch((e) => {
+            console.error(e);
+            redirectToLogin();
+        })
+        .finally(() => {
+            deleteDashboardSpinner();
+        })
+
+    async function fetchUserInfo() {
+        const userInfoRes = await axios.get('/api/account/userinfo', {
+            headers: {
+                "Authorization": `Bearer ${access_token}`
+            }
+        });
+        const userInfo = userInfoRes.data;
+        let subscription;
+        try {
+            subscriptionRes = await axios.get('/api/Stripe/Subscription', {
+                headers: {
+                    "Authorization": `Bearer ${access_token}`
+                }
+            });
+            subscription = subscriptionRes.data;
+        } catch (e) {
+            if (e.response.status === 404) {
+                subscription = null;
+            } else {
+                throw e;
+            }
+        }
+
+        const stripeEventsRes = await axios.get('/api/Stripe/StripeEvents', {
+            headers: {
+                "Authorization": `Bearer ${access_token}`
+            }
+        })
+        const stripeEvents = stripeEventsRes.data;
+
+        return { userInfo, subscription, stripeEvents };
+    }
+
+
+    function renderSubscribedDashboard(userInfo, subscription, stripeEvents) {
+        return `
+            <h3 id="dashboard-email">Email: ${userInfo.Email}</h3>
+
+            <p id="dashboard-subscription-plan">Subscription Plan: ${subscription.planName}</p>
+            <p id="dashboard-subscription-status">Subscription Status: ${subscription.status}</p>
+
+
+            <button
+            style="background-color:#6772E5;color:#FFF;padding:8px 12px;border:0;border-radius:4px;font-size:1em"
+            id="manage-button-basic"
+            role="link"
+            type="button"
+            >
+            Manage Subscription / Billing
+            </button>
+            ${renderStripeEventTable(stripeEvents)}
+        `;
+    }
+
+    function renderStripeEventTable(stripeEvents) {
+        const rows = stripeEvents.map(e => {
+            const obj = JSON.parse(e.Json);
+            console.log(obj);
+            return `
+            <tr>
+                <td class="col-md-2">${obj.type}</td>
+                <td class="col-md-8" style="word-wrap: break-word;min-width: 160px;max-width: 160px;white-space:normal;">${JSON.stringify(obj.data.object)}</td>
+                <td class="col-md-2">${e.Date}</td>
+            </tr>
+`;
+        })
+
+        return `
+<h3>Stripe Events</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Type</th>
+      <th scope="col">Content</th>
+      <th scope="col">Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${rows.join('\n')}
+  </tbody>
+</table>
+        `;
+    }
+
+    function renderUnsubscribedDashboard(userInfo) {
+        return `
+            <h3 id="dashboard-email">Email: ${userInfo.Email}</h3>
+
+            <div class="container">
+                <div class="row">
+                <div class="col-sm-12 text-center">
+                    <h1 class="display-4">Pricing</h1>
+                    <p class="lead">Select a plan to power your business</p>
+                </div>
+                </div>
+                <div class="row">
+                <div class="col-sm-6">
+                    <div class="card text-center">
+                    <div class="card-header">
+                        <h4><b>Basic</b></h4>
+                    </div>
+                    <div class="card-body">
+                    <h5 class="card-title"><b>$5/day</b></h5>
+                    <p class="card-text">Basic Plan.</p>
+                    <button id="checkout-button-basic" class="btn btn-primary">Checkout</button>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card text-center">
+                    <div class="card-header">
+                        <h4><b>Premium</b></h4>
+                    </div>
+                    <div class="card-body">
+                    <h5 class="card-title"><b>$15/day</b></h5>
+                    <p class="card-text">Premium Plan.</p>
+                    <button id="checkout-button-premium" class="btn btn-primary">Checkout</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        `;
+    }
+
+    $(document).on("click", '#manage-button-basic', function () {
+        $.ajax({
+            type: "POST",
+            url: '/api/Stripe/CustomerPortal/',
+            headers: {
+                "Authorization": `Bearer ${access_token}`
+            },
+            success: function (data, textStatus) {
+                window.location.replace(data.url);
+            }
+        });
+    });
+
+    $(document).on("click", '#checkout-button-basic', function () {
+        $.ajax({
+            type: "POST",
+            url: '/api/Stripe/BasicCheckoutSession/',
+            headers: {
+                "Authorization": `Bearer ${access_token}`
+            }
+        }).done(async function (session) {
+            try {
+                console.log(session)
+                const result = await stripe.redirectToCheckout({ sessionId: session.id });
+                console.log(result)
+                if (result.error) {
+                    alert(result.error.message);
+                }
+            } catch (e) {
+                console.error('Error:', e);
+            }
+        }).fail(function (e) {
+            console.error('Error:', e);
+        });
+    });
+
+    $(document).on("click", '#checkout-button-premium', function () {
+        $.ajax({
+            type: "POST",
+            url: '/api/Stripe/PremiumCheckoutSession/',
+            headers: {
+                "Authorization": `Bearer ${access_token}`
+            }
+        }).done(async function (session) {
+            try {
+                console.log(session)
+                const result = await stripe.redirectToCheckout({ sessionId: session.id });
+                console.log(result)
+                if (result.error) {
+                    alert(result.error.message);
+                }
+            } catch (e) {
+                console.error('Error:', e);
+            }
+        }).fail(function (e) {
+            console.error('Error:', e);
+        });
+    });
+
+    function retryingAjax(ajaxOptions, maxRetries, timeoutMs) {
+        const thunk = () => ajaxPromise(ajaxOptions);
+        const retry = (fn, maxRetries, timeoutMs) => new Promise((resolve, reject) => {
+            fn()
+                .then(resolve)
+                .catch((e) => {
+                    if (maxRetries === 1) {
+                        return reject(e);
+                    }
+                    console.log('retrying failed promise...');
+                    setTimeout(() => {
+                        retry(fn, maxRetries - 1, timeoutMs).then(resolve).catch(reject);
+                    }, timeoutMs);
+
+                })
+        });
+        return retry(thunk, maxRetries, timeoutMs);
+    }
+
+    function ajaxPromise(ajaxOptions) {
+        return new Promise((resolve, reject) => {
+            $.ajax(ajaxOptions)
+                .done(function (data) { resolve(data) })
+                .fail(function (jqXHR) { reject(jqXHR) });
+        });
+    }
+
+    async function makeApiRequest(ajaxOptions, maxRetries = 5, timeoutMs = 1000) {
+        try {
+            hideAlert();
+            showSpinner();
+            const res = await retryingAjax(ajaxOptions, maxRetries, timeoutMs);
+            return res;
+        } catch (e) {
+            if (e.status) {
+                showAlert(`Request Failed with status code ${e.status}`);
+            } else {
+                showAlert("Request Failed");
+            }
+            throw e;
+        } finally {
+            hideSpinner();
+        }
+    }
+
+    function deleteDashboardSpinner() {
+        $("#dashboard-spinner").hide();
+    }
+
+    function showSpinner() {
+        $("#spinner").show();
+    }
+
+    function showAlert(msg) {
+        $("#danger-alert-text").text(msg);
+        $("#danger-alert").show();
+    }
+
+    function hideSpinner() {
+        $("#spinner").hide();
+    }
+
+    function hideAlert() {
+        $("#danger-alert").hide();
+    }
+
+    function redirectToLogin() {
+        alert("Please login before accessing dashboard. Redirecting...")
+        window.location.replace('/Home/Login');
+    }
+</script>
+
+
+
