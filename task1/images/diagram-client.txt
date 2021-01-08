@@ -1,0 +1,15 @@
+@startuml
+actor User
+participant "HTML Page" as Page
+participant "Javascript" as JS
+participant "NEA API" as NEA
+
+Page -> Page: Load page with button
+User -> Page: Click button "Get weather"
+JS -> JS: Button click handler function called
+JS -> NEA: AJAX calls GET /v1/environment/24-hour-weather-forecast
+NEA --> JS: JSON result of 24 hour weather forecast
+JS -> JS: Format JSON result
+JS -> Page: Mutate DOM to display formatted results
+
+@enduml

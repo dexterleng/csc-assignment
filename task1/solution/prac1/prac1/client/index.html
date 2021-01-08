@@ -1,0 +1,23 @@
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>task 1</title>
+     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+ </head>
+ <body>
+     <button id="btn">Get weather</button>
+     <div style="white-space: pre-wrap;" id="container"></div>
+ </body>
+ <script>
+     $("#btn").click(() => {
+        $.ajax({
+            url: "https://api.data.gov.sg/v1/environment/24-hour-weather-forecast",
+            success: (res) => {
+                $("#container").text(JSON.stringify(res, null, 4));
+            }
+        });
+     });
+ </script>
+ </html>
