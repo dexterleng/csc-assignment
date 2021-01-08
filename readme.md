@@ -75,6 +75,9 @@ Example:
 https://bit.ly/...
 ```
 
+### Error
+400 Bad Request. If the submitted file is above 2mb or is not an image
+
 # Additional features
 
 ## Verify file is an image and is a reasonable size (server)
