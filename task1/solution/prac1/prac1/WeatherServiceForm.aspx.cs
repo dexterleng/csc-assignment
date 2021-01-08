@@ -19,6 +19,7 @@ namespace bruhhhhhhh
 
 			url.Host = "api.data.gov.sg/v1";
 			url.Path = "environment/24-hour-weather-forecast";// change to v2
+			//url.Query = "date=2021-01-08";
 			//url.Query = "q=china&format=xml&num_of_days=5&key=x35ahuadjhmdp5rb75ddw2ha";
 
 			//Make a HTTP request to the global weather web service
