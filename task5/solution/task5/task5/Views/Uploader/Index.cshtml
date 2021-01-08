@@ -1,0 +1,55 @@
+﻿
+@{
+	ViewBag.Title = "Index";
+}
+
+<h2>Upload Image</h2>
+
+<a id="url"></a>
+
+<form id="form" method="post" action="/api/upload" enctype="multipart/form-data">
+	<input id="file-input" type="file" name="file" accept="image/*" />
+	<input type="submit" value="Upload File" />
+</form>
+
+@section scripts
+{
+	<script>
+		$('#form')
+			.submit(function(e) {
+
+				const files = $("#file-input")[0].files;
+				if (files.length != 1)
+				{
+					alert("Submit a single file");
+					e.preventDefault();
+					return;
+				}
+
+				if (!files[0].type.startsWith("image/"))
+				{
+					alert("Submitted file must be an image");
+					e.preventDefault();
+					return;
+				}
+
+				$.ajax({
+					url: '/api/upload',
+					type: 'POST',
+					data: new FormData(this),
+					processData: false,
+					contentType: false
+				})
+				.done(res => {
+					const placeholder = $("#url");
+					placeholder.attr("href", res);
+					placeholder.text(res);
+				})
+				.fail(xhr => {
+					alert(`upload failed: ${xhr.responseText}`)
+				});
+
+				e.preventDefault();
+			});
+	</script>
+}
