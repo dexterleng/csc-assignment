@@ -133,7 +133,8 @@ Over/under posting project: `Practical3`
 }
 ```
 
-If input is invalid:
+### Error
+400 Bad Request. If input is invalid:
 
 ```json
 {
