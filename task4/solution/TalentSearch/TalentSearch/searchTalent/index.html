@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Live Search</title>
+	<link rel="stylesheet" href="mystyle.css" />
+</head>
+<body>
+	
+	<div id="spinner">
+		<div>
+			<p style="font-size: 2em">Loading...</p>
+		</div>
+	</div>
+
+<div id="searcharea">
+	<label for="search">live search</label>
+	<p>Enter the name or info about a speaker</p>
+	<input type="search" name="search" id="search" placeholder="name or info" />
+</div>
+<div id="update"></div>
+<script src="jquery.js"></script>
+<script src="jquery.ba-throttle-debounce.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
+
+<style>
+	#spinner {
+		display: flex;
+		position: fixed;
+		width: 100%;
+		height: 100%;
+		text-align: center;
+		justify-content: center;
+		align-content: center;
+		flex-direction: column;
+		background-color: rgba(128, 128, 128, 0.5);
+	}
+
+	.hide {
+		display: none !important;
+	}
+</style>
